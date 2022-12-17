@@ -1,0 +1,12 @@
+version: '3'
+services:
+  singlefile:
+    container_name: singlefile
+    image: screenbreak/singlefile-dockerized
+    entrypoint: python3
+    command: webserver.py
+    ports:
+      - 80:80
+    volumes:
+      - ./htmls:/opt/app/htmls
+      - ./webserver.py:/opt/app/webserver.py
