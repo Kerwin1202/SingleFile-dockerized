@@ -2,6 +2,7 @@ import subprocess
 from flask import Flask, request, Response, jsonify, render_template
 import os
 from urllib.parse import urljoin
+import re
 
 server = Flask(__name__, template_folder='/opt/app')
 
@@ -11,6 +12,8 @@ BROWSER_ARGS = '["--no-sandbox"]'
 
 BASE_DIR = './htmls'
 
+def format_str(str):
+	return re.sub(r"""[!@#`~%^&*()+=\-\|\\'";:/\?\.>,<！·，。、？：;“”’‘]""", "_", str)
 
 def get_html_path(key, name):
     return f'{BASE_DIR}/{key}/{name}.html'
@@ -28,9 +31,12 @@ def singlefile():
     key = request.args.get('key')
     name = request.args.get('name')
     refresh = request.args.get('refresh', False)
-    if key and name and not refresh and os.path.exists(get_html_path(key, name)):
-        response = {'url': urljoin(request.base_url, f'/dl/{key}/{name}.html')}
-        return jsonify(response)
+    if key and name and not refresh:
+        key = format_str(key)
+        name = format_str(name)
+        if os.path.exists(get_html_path(key, name)):
+            response = {'url': urljoin(request.base_url, f'/dl/{key}/{name}.html')}
+            return jsonify(response)
 
     if url:
         p = subprocess.Popen([
@@ -49,6 +55,8 @@ def singlefile():
     key = request.args.get('key')
     name = request.args.get('name')
     if key and name:
+        key = format_str(key)
+        name = format_str(name)
         folder_path = f'{BASE_DIR}/{key}'
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
