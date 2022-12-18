@@ -24,14 +24,24 @@ services:
     image: screenbreak/singlefile-dockerized
     entrypoint: python3
     command: webserver.py
-    expose:
-      - 80
+    ports:
+      - 80:80
+    volumes:
+      - ./htmls:/opt/app/htmls
+      - ./webserver.py:/opt/app/webserver.py
 ```
 
 Then any HTTP POST on port 80 with url parameter will respond with the HTML output of SingleFile in the payload:
 
 ```bash
-curl -d 'url=http://www.example.com/' singlefile:80
+# download html and save, return access url
+curl --location --request GET 'http://127.0.0.1:12580/?key=folder&name=title&url=https://www.example.com'
+
+# force refresh local html file
+curl --location --request GET 'http://127.0.0.1:12580/?key=folder&name=title&refresh=true&url=https://www.example.com'
+
+# only ouput html content
+curl --location --request GET 'http://127.0.0.1:12580/?url=https://www.example.com'
 ```
 
 ### Output example:
